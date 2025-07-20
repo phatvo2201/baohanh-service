@@ -6,25 +6,23 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
-// CORSMiddleware implements a custom CORS policy
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Set all the necessary headers
+		// Allow all origins
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept, Origin, Cache-Control, X-Requested-With")
-		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
-		c.Header("Content-Type", "application/json")
 
-		// Handle OPTIONS method
+		c.Header("Access-Control-Allow-Headers", "*")
+
+		c.Header("Access-Control-Allow-Methods", "*")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusOK)
+			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
 
@@ -46,7 +44,7 @@ func main() {
 
 	// Initialize Gin router
 	r := gin.Default()
-	
+
 	// Use our custom CORS middleware
 	r.Use(CORSMiddleware())
 
@@ -57,7 +55,7 @@ func main() {
 	r.Static("/uploads", "./uploads")
 
 	routes.SetupRoutes(r)
-	
+
 	// Start the server
 	r.Run(":" + os.Getenv("PORT"))
 }
