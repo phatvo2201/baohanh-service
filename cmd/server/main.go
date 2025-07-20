@@ -4,32 +4,12 @@ import (
 	"go-auth-app/config"
 	"go-auth-app/routes"
 	"log"
-	"net/http"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
-
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Allow all origins
-		c.Header("Access-Control-Allow-Origin", "*")
-
-		c.Header("Access-Control-Allow-Headers", "*")
-
-		c.Header("Access-Control-Allow-Methods", "*")
-		c.Header("Access-Control-Allow-Credentials", "true")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
-
-		// Continue to the next middleware/handler
-		c.Next()
-	}
-}
 
 func main() {
 	// Load environment variables
@@ -45,8 +25,16 @@ func main() {
 	// Initialize Gin router
 	r := gin.Default()
 
-	// Use our custom CORS middleware
-	r.Use(CORSMiddleware())
+	// Configure CORS to allow all origins for local development
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "Accept", "X-Requested-With", "X-CSRF-Token"}
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowCredentials = false // Set to false when using AllowAllOrigins
+	config.MaxAge = 12 * 60 * 60    // 12 hours
+
+	r.Use(cors.New(config))
 
 	// Register routes
 	r.GET("/a", func(c *gin.Context) {
