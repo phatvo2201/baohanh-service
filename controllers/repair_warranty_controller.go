@@ -6,6 +6,7 @@ import (
 	"go-auth-app/models"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -74,45 +75,63 @@ func UpdateRepairWarranty(c *gin.Context) {
 		return
 	}
 
-	// Nhận các trường text
-	ten := c.PostForm("ten")
-	sdt := c.PostForm("sdt")
-	imei := c.PostForm("imei")
-	if ten != "" {
-		rw.Ten = ten
-	}
-	if sdt != "" {
-		rw.Sdt = sdt
-	}
-	if imei != "" {
-		rw.Imei = imei
-	}
-
-	// Nhận file hình ảnh mới (nếu có)
-	file, err := c.FormFile("hinhAnh")
-	if err == nil {
-		uploadPath := filepath.Join("uploads", file.Filename)
-		if err := c.SaveUploadedFile(file, uploadPath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Upload image failed"})
+	contentType := c.GetHeader("Content-Type")
+	if strings.HasPrefix(contentType, "application/json") {
+		var input struct {
+			Ten  string `json:"ten"`
+			Sdt  string `json:"sdt"`
+			Imei string `json:"imei"`
+		}
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		rw.HinhAnh = uploadPath
-	}
-
-	// Nhận trường sửa chữa mới (JSON string) và thêm vào
-	suaChuaJson := c.PostForm("suaChua")
-	if suaChuaJson != "" {
-		var details []models.RepairDetail
-		if err := json.Unmarshal([]byte(suaChuaJson), &details); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid suaChua"})
-			return
+		if input.Ten != "" {
+			rw.Ten = input.Ten
 		}
-		// Gán RepairWarrantyID cho từng bản ghi mới và thêm vào DB
-		for i := range details {
-			details[i].RepairWarrantyID = rw.ID
-			if err := config.DB.Create(&details[i]).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Add repair detail failed"})
+		if input.Sdt != "" {
+			rw.Sdt = input.Sdt
+		}
+		if input.Imei != "" {
+			rw.Imei = input.Imei
+		}
+	} else {
+		ten := c.PostForm("ten")
+		sdt := c.PostForm("sdt")
+		imei := c.PostForm("imei")
+		if ten != "" {
+			rw.Ten = ten
+		}
+		if sdt != "" {
+			rw.Sdt = sdt
+		}
+		if imei != "" {
+			rw.Imei = imei
+		}
+
+		file, err := c.FormFile("hinhAnh")
+		if err == nil {
+			uploadPath := filepath.Join("uploads", file.Filename)
+			if err := c.SaveUploadedFile(file, uploadPath); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Upload image failed"})
 				return
+			}
+			rw.HinhAnh = uploadPath
+		}
+
+		suaChuaJson := c.PostForm("suaChua")
+		if suaChuaJson != "" {
+			var details []models.RepairDetail
+			if err := json.Unmarshal([]byte(suaChuaJson), &details); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid suaChua"})
+				return
+			}
+			for i := range details {
+				details[i].RepairWarrantyID = rw.ID
+				if err := config.DB.Create(&details[i]).Error; err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Add repair detail failed"})
+					return
+				}
 			}
 		}
 	}
