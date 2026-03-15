@@ -15,40 +15,42 @@ func SetupRoutes(router *gin.Engine) {
 	}
 
 	api := router.Group("/api")
-	api.Use(middleware.AuthMiddleware())
 
 	// User CRUD - admin only
 	user := api.Group("/users")
-	user.Use(middleware.AdminOnly())
 	{
-		user.GET("/", controllers.GetAllUsers)
-		user.POST("/", controllers.Register)
-		user.GET("/:id", controllers.GetUserByID)
-		user.PUT("/:id", controllers.UpdateUser)
-		user.DELETE("/:id", controllers.DeleteUser)
+		user.GET("/", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.GetAllUsers)
+		user.POST("/", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.Register)
+		user.GET("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.GetUserByID)
+		user.PUT("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.UpdateUser)
+		user.DELETE("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteUser)
 	}
 
-	// ProductWarranty CRUD - admin only
+	// ProductWarranty
 	productWarranty := api.Group("/productwarranty")
-	productWarranty.Use(middleware.AdminOnly())
 	{
-		productWarranty.POST("/", controllers.CreateProductWarranty)
+		// Public endpoints (no token required)
 		productWarranty.GET("/", controllers.GetAllProductWarranties)
 		productWarranty.GET("/:id", controllers.GetProductWarrantyByID)
-		productWarranty.PUT("/:id", controllers.UpdateProductWarranty)
-		productWarranty.DELETE("/:id", controllers.DeleteProductWarranty)
 		productWarranty.GET("/:id/repairs", controllers.ListRepairDetailsByProductWarrantyID)
+
+		// Protected endpoints (admin only)
+		productWarranty.POST("/", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.CreateProductWarranty)
+		productWarranty.PUT("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.UpdateProductWarranty)
+		productWarranty.DELETE("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteProductWarranty)
 	}
 
-	// RepairWarranty CRUD - admin only
+	// RepairWarranty
 	repairWarranty := api.Group("/repairwarranty")
-	repairWarranty.Use(middleware.AdminOnly())
 	{
-		repairWarranty.POST("/", controllers.CreateRepairWarranty)
+		// Public endpoints (no token required)
 		repairWarranty.GET("/", controllers.GetAllRepairWarranties)
 		repairWarranty.GET("/:id", controllers.GetRepairWarrantyByID)
-		repairWarranty.PUT("/:id", controllers.UpdateRepairWarranty)
-		repairWarranty.DELETE("/:id", controllers.DeleteRepairWarranty)
 		repairWarranty.GET("/:id/repairs", controllers.ListRepairDetailsByRepairWarrantyID)
+
+		// Protected endpoints (admin only)
+		repairWarranty.POST("/", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.CreateRepairWarranty)
+		repairWarranty.PUT("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.UpdateRepairWarranty)
+		repairWarranty.DELETE("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteRepairWarranty)
 	}
 }
