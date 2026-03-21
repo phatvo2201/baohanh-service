@@ -6,6 +6,7 @@ import (
 	"go-auth-app/models"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -179,4 +180,49 @@ func ListRepairDetailsByProductWarrantyID(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, details)
+}
+
+func AddRepairDetailToProductWarranty(c *gin.Context) {
+	id := c.Param("id")
+	var pw models.ProductWarranty
+	if err := config.DB.First(&pw, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product warranty not found"})
+		return
+	}
+
+	var input models.RepairData
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	input.ID = 0
+	input.ProductWarrantyID = pw.ID
+	if err := config.DB.Create(&input).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Create repair data failed"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, input)
+}
+
+func DeleteRepairDetailByProductWarrantyID(c *gin.Context) {
+	id := c.Param("id")
+	repairID, err := strconv.ParseUint(c.Param("repairId"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid repair id"})
+		return
+	}
+
+	result := config.DB.Where("id = ? AND product_warranty_id = ?", uint(repairID), id).Delete(&models.RepairData{})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Delete failed"})
+		return
+	}
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Repair detail not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Deleted"})
 }
