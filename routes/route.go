@@ -38,6 +38,8 @@ func SetupRoutes(router *gin.Engine) {
 		productWarranty.POST("/", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.CreateProductWarranty)
 		productWarranty.PUT("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.UpdateProductWarranty)
 		productWarranty.DELETE("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteProductWarranty)
+		productWarranty.POST("/:id/repairs", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.AddRepairDetailToProductWarranty)
+		productWarranty.DELETE("/:id/repairs/:repairId", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteRepairDetailByProductWarrantyID)
 	}
 
 	// RepairWarranty
@@ -52,5 +54,9 @@ func SetupRoutes(router *gin.Engine) {
 		repairWarranty.POST("/", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.CreateRepairWarranty)
 		repairWarranty.PUT("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.UpdateRepairWarranty)
 		repairWarranty.DELETE("/:id", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteRepairWarranty)
+		repairWarranty.POST("/:id/repairs", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.AddRepairDetailToRepairWarranty)
+		repairWarranty.DELETE("/:id/repairs/:repairId", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteRepairDetailByRepairWarrantyID)
+		// Keep this for current frontend path in viewfix.jsx
+		repairWarranty.DELETE("/:id/:repairId", middleware.AuthMiddleware(), middleware.AdminOnly(), controllers.DeleteRepairDetailByRepairWarrantyID)
 	}
 }
