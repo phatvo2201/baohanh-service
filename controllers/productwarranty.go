@@ -16,6 +16,7 @@ func CreateProductWarranty(c *gin.Context) {
 
 	// Nhận các trường text
 	pw.Ten = c.PostForm("ten")
+	pw.Sdt = c.PostForm("sdt")
 	pw.Imei = c.PostForm("imei")
 	pw.NgayMua = c.PostForm("ngayMua")
 	pw.HetHan = c.PostForm("hetHan")
@@ -80,6 +81,7 @@ func UpdateProductWarranty(c *gin.Context) {
 	if strings.HasPrefix(contentType, "application/json") {
 		var input struct {
 			Ten     string `json:"ten"`
+			Sdt     string `json:"sdt"`
 			Imei    string `json:"imei"`
 			NgayMua string `json:"ngayMua"`
 			HetHan  string `json:"hetHan"`
@@ -90,6 +92,9 @@ func UpdateProductWarranty(c *gin.Context) {
 		}
 		if input.Ten != "" {
 			pw.Ten = input.Ten
+		}
+		if input.Sdt != "" {
+			pw.Sdt = input.Sdt
 		}
 		if input.Imei != "" {
 			pw.Imei = input.Imei
@@ -103,11 +108,15 @@ func UpdateProductWarranty(c *gin.Context) {
 	} else {
 		// Form data (e.g. when uploading file)
 		ten := c.PostForm("ten")
+		sdt := c.PostForm("sdt")
 		imei := c.PostForm("imei")
 		ngayMua := c.PostForm("ngayMua")
 		hetHan := c.PostForm("hetHan")
 		if ten != "" {
 			pw.Ten = ten
+		}
+		if sdt != "" {
+			pw.Sdt = sdt
 		}
 		if imei != "" {
 			pw.Imei = imei
