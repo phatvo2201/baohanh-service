@@ -142,7 +142,7 @@ func UpdateUser(c *gin.Context) {
 
 func DeleteUser(c *gin.Context) {
 	id := c.Param("id")
-	if err := config.DB.Delete(&models.User{}, id).Error; err != nil {
+	if err := config.DB.Where("id = ?", id).Delete(&models.User{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Delete failed"})
 		return
 	}
