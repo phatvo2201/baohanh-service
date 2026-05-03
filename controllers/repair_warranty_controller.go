@@ -19,6 +19,7 @@ func CreateRepairWarranty(c *gin.Context) {
 	rw.Ten = c.PostForm("ten")
 	rw.Sdt = c.PostForm("sdt")
 	rw.Imei = c.PostForm("imei")
+	rw.NgayHetBaoHanh = c.PostForm("ngayHetBaoHanh")
 
 	// Nhận file hình ảnh
 	file, err := c.FormFile("hinhAnh")
@@ -79,9 +80,10 @@ func UpdateRepairWarranty(c *gin.Context) {
 	contentType := c.GetHeader("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
 		var input struct {
-			Ten  string `json:"ten"`
-			Sdt  string `json:"sdt"`
-			Imei string `json:"imei"`
+			Ten            string `json:"ten"`
+			Sdt            string `json:"sdt"`
+			Imei           string `json:"imei"`
+			NgayHetBaoHanh string `json:"ngayHetBaoHanh"`
 		}
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -96,10 +98,14 @@ func UpdateRepairWarranty(c *gin.Context) {
 		if input.Imei != "" {
 			rw.Imei = input.Imei
 		}
+		if input.NgayHetBaoHanh != "" {
+			rw.NgayHetBaoHanh = input.NgayHetBaoHanh
+		}
 	} else {
 		ten := c.PostForm("ten")
 		sdt := c.PostForm("sdt")
 		imei := c.PostForm("imei")
+		ngayHetBaoHanh := c.PostForm("ngayHetBaoHanh")
 		if ten != "" {
 			rw.Ten = ten
 		}
@@ -108,6 +114,9 @@ func UpdateRepairWarranty(c *gin.Context) {
 		}
 		if imei != "" {
 			rw.Imei = imei
+		}
+		if ngayHetBaoHanh != "" {
+			rw.NgayHetBaoHanh = ngayHetBaoHanh
 		}
 
 		file, err := c.FormFile("hinhAnh")

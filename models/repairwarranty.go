@@ -16,5 +16,6 @@ type RepairWarranty struct {
 	HinhAnh string         `json:"hinhAnh"`
 	Sdt     string         `json:"sdt"`
 	Imei    string         `json:"imei"`
-	SuaChua []RepairDetail `json:"suaChua" gorm:"foreignKey:RepairWarrantyID"`
+	SuaChua        []RepairDetail `json:"suaChua" gorm:"foreignKey:RepairWarrantyID"`
+	NgayHetBaoHanh string         `json:"ngayHetBaoHanh"`
 }
